@@ -1,10 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris</title>
+
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
+<h1>Welcome to Tetris</h1>
 
+<main class="game">
+<!--    // Chọn cấp độ trước khi  bắt đầu chơi-->
+    <div class="start_ui">
+        <h3>Chọn cấp độ chơi:</h3>
+        <label><input type="radio" name="level" value="1" checked> Lv1</label>
+        <label><input type="radio" name="level" value="2"> Lv2</label>
+        <label><input type="radio" name="level" value="3"> Lv3</label>
+        <label><input type="radio" name="level" value="4"> Lv4</label>
+        <label><input type="radio" name="level" value="5"> Lv5</label>
+        <label><input type="radio" name="level" value="6"> Lv6</label>
+    </div>
+
+<!--// Tạo màn chơi-->
+    <div id="playfield"></div>
+<!--// Nội dung trò chơi-->
+    <aside class="game_info">
+        <p>Điểm: <span id="score">0</span></p>
+        <p>Hàng đã xoá: <span id="lines">0</span></p>
+        <p>Cấp độ: <span id="level">1</span></p>
+        <button class="game_button" id="start_button">Bắt đầu</button>
+        <button class="game_button" id="stop_button">Tạm dừng</button>
+        <button class="game_button" id="restart_button">Chơi lại</button>
+    </aside>
+</main>
 </body>
 </html>
