@@ -1,8 +1,8 @@
 body {
     margin: 0;
     min-height: 100vh;
-    background-color: #171a2b;
-    color: white;
+    background-color: #161922;
+    color: #e8e8e8;
     font-family: Arial, sans-serif;
     text-align: center;
 }
@@ -10,6 +10,7 @@ body {
 h1 {
     margin: 30px 0;
     color: #61dafb;
+    font-family: monospace;
     letter-spacing: 4px;
 }
 
@@ -25,30 +26,21 @@ h1 {
     width: 170px;
     padding: 16px;
     background-color: #252a40;
-    border-radius: 10px;
+    border: 3px solid #f2b84b;
     text-align: left;
 }
 
-.start_ui h3 {
-    margin-top: 0;
-}
-
-.start_ui label {
-    display: block;
-    margin: 10px 0;
-    cursor: pointer;
-}
 
 #playfield {
     width: 350px;
     height: 700px;
-    border: 4px solid #61dafb;
-    background-color: #111423;
+    border: 3px solid #f2b84b;
+    background-color: #10131b;
 
     background-image:
-            linear-gradient(#33384d 1px, transparent 1px),
-            linear-gradient(90deg, #33384d 1px, transparent 1px);
-    background-size: 30px 30px;
+            linear-gradient(#282d39 1px, transparent 1px),
+            linear-gradient(90deg, #282d39 1px, transparent 1px);
+    background-size: 35px 35px;
 }
 
 /* Kiểu dáng chung cho các nút */
@@ -75,4 +67,24 @@ h1 {
 
 #restart_button {
     background-color: gold;
+}
+.left_panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.nextBox_ui {
+    width: 170px;
+    padding: 16px;
+    border: 3px solid #f2b84b;
+    text-align: left;
+}
+
+.nextBox_ui h3 {
+    margin-top: 0;
+}
+#next_piece {
+    width: 180px;
+    height: 180px;
+    background-color: #10131b;
 }
