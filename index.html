@@ -12,7 +12,8 @@
 <h1>Welcome to Tetris</h1>
 
 <main class="game">
-<!--    // Chọn cấp độ trước khi  bắt đầu chơi-->
+    <div class="left_panel">
+    <!--    // Chọn cấp độ trước khi  bắt đầu chơi-->
     <div class="start_ui">
         <h3>Chọn cấp độ chơi:</h3>
         <label><input type="radio" name="level" value="1" checked> Lv1</label>
@@ -22,7 +23,12 @@
         <label><input type="radio" name="level" value="5"> Lv5</label>
         <label><input type="radio" name="level" value="6"> Lv6</label>
     </div>
-
+<br>
+    <div class="nextBox_ui">
+        <h3>Khối kế tiếp</h3>
+        <div id="next_piece"></div>
+    </div>
+    </div>
 <!--// Tạo màn chơi-->
     <div id="playfield"></div>
 <!--// Nội dung trò chơi-->
@@ -34,6 +40,8 @@
         <button class="game_button" id="stop_button">Tạm dừng</button>
         <button class="game_button" id="restart_button">Chơi lại</button>
     </aside>
+
+
 </main>
 </body>
 </html>
