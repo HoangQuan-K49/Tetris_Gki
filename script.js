@@ -5,7 +5,7 @@ const cols = 10;
 const panel = [];
 
 for (let row = 0; row < rows; row++) {
-    panel[row] = 0;
+    panel[row] = [];
 
     for (let col = 0; col < cols; col++) {
         panel[row][col] = 0;
