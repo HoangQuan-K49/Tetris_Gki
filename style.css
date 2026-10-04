@@ -35,14 +35,13 @@ h1 {
     display: grid;
     grid-template-columns: repeat(10, 35px);
     grid-template-rows: repeat(20, 35px);
-
+    box-sizing: content-box;
     width: 350px;
     height: 700px;
     border: 3px solid #f2b84b;
     background-color: #10131b;
 }
 
-/* Kiểu dáng chung cho các nút */
 .game_button {
     box-sizing: border-box;
     width: 100%;
@@ -54,7 +53,6 @@ h1 {
     cursor: pointer;
 }
 
-/* Màu riêng của từng nút */
 #start_button {
     background-color: #61dafb;
 }
@@ -89,12 +87,13 @@ h1 {
 }
 
 .cell {
+    width: 35px;
+    height: 35px;
     box-sizing: border-box;
     border: 1px solid #282d39;
     background-color: #10131b;
 }
 
-/* Màu của 7 khối */
 .cell.I { background-color: #22d3ee; }
 .cell.O { background-color: #facc15; }
 .cell.T { background-color: #a855f7; }
