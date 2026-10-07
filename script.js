@@ -50,7 +50,13 @@ const pieces = [
     { name: "L", shape: shapeL }
 ];
 
-let currentPiece = pieces[1];
+function getRandomPiece() {
+    const randomIndex = Math.floor(Math.random() * pieces.length);
+    return pieces[randomIndex];
+}
+
+let currentPiece = getRandomPiece();
+pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
 
 function createGrid() {
     for (let row = 0; row < rows; row++) {
@@ -88,6 +94,17 @@ function draw() {
         }
     }
 }
-
 createGrid();
 draw();
+
+setInterval(function () {
+    if (pieceRow + currentPiece.shape.length < rows) {
+        pieceRow++;
+    } else {
+        pieceRow = 0;
+        currentPiece = getRandomPiece();
+        pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
+    }
+
+    draw();
+}, 1000);
