@@ -50,3 +50,44 @@ const pieces = [
     { name: "L", shape: shapeL }
 ];
 
+let currentPiece = pieces[1];
+
+function createGrid() {
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            const cell = document.createElement("div");
+
+            cell.id = `cell-${row}-${col}`;
+            cell.classList.add("cell");
+            playField.appendChild(cell);
+        }
+    }
+}
+
+function draw() {
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            const cell = document.getElementById(`cell-${row}-${col}`);
+            cell.className = "cell";
+        }
+    }
+
+    for (let row = 0; row < currentPiece.shape.length; row++) {
+        for (let col = 0; col < currentPiece.shape[row].length; col++) {
+            if (currentPiece.shape[row][col] === 1) {
+                const screenRow = pieceRow + row;
+                const screenCol = pieceCol + col;
+                const cell = document.getElementById(
+                    `cell-${screenRow}-${screenCol}`
+                );
+
+                if (cell) {
+                    cell.classList.add(currentPiece.name);
+                }
+            }
+        }
+    }
+}
+
+createGrid();
+draw();
