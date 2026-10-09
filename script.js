@@ -3,6 +3,7 @@ const cols = 10;
 
 let pieceRow = 0;
 let pieceCol = 4;
+let gameOver = false;
 
 const playField = document.getElementById("playfield");
 
@@ -41,13 +42,13 @@ const shapeL = [
 ];
 
 const pieces = [
-    {name: "I", shape: shapeI},
-    {name: "O", shape: shapeO},
-    {name: "T", shape: shapeT},
-    {name: "S", shape: shapeS},
-    {name: "Z", shape: shapeZ},
-    {name: "J", shape: shapeJ},
-    {name: "L", shape: shapeL}
+    { name: "I", shape: shapeI },
+    { name: "O", shape: shapeO },
+    { name: "T", shape: shapeT },
+    { name: "S", shape: shapeS },
+    { name: "Z", shape: shapeZ },
+    { name: "J", shape: shapeJ },
+    { name: "L", shape: shapeL }
 ];
 
 function getRandomPiece() {
@@ -57,6 +58,16 @@ function getRandomPiece() {
 
 let currentPiece = getRandomPiece();
 pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
+
+const board = [];
+
+for (let row = 0; row < rows; row++) {
+    board[row] = [];
+
+    for (let col = 0; col < cols; col++) {
+        board[row][col] = 0;
+    }
+}
 
 function createGrid() {
     for (let row = 0; row < rows; row++) {
@@ -70,6 +81,55 @@ function createGrid() {
     }
 }
 
+function haveBlock(rowCheck, colCheck) {
+    for (let row = 0; row < currentPiece.shape.length; row++) {
+        for (let col = 0; col < currentPiece.shape[row].length; col++) {
+            if (currentPiece.shape[row][col] === 1) {
+                const rowLine = rowCheck + row;
+                const colLine = colCheck + col;
+
+                if (
+                    colLine < 0 ||
+                    colLine >= cols ||
+                    rowLine >= rows
+                ) {
+                    return true;
+                }
+
+                if (rowLine >= 0 && board[rowLine][colLine] !== 0) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+function saveBlock() {
+    for (let row = 0; row < currentPiece.shape.length; row++) {
+        for (let col = 0; col < currentPiece.shape[row].length; col++) {
+            if (currentPiece.shape[row][col] === 1) {
+                const rowLine = pieceRow + row;
+                const colLine = pieceCol + col;
+
+                board[rowLine][colLine] = currentPiece.name;
+            }
+        }
+    }
+}
+
+function drawSaveBlock() {
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            if (board[row][col] !== 0) {
+                const cell = document.getElementById(`cell-${row}-${col}`);
+                cell.classList.add(board[row][col]);
+            }
+        }
+    }
+}
+
 function draw() {
     for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
@@ -78,17 +138,21 @@ function draw() {
         }
     }
 
-    for (let row = 0; row < currentPiece.shape.length; row++) {
-        for (let col = 0; col < currentPiece.shape[row].length; col++) {
-            if (currentPiece.shape[row][col] === 1) {
-                const screenRow = pieceRow + row;
-                const screenCol = pieceCol + col;
-                const cell = document.getElementById(
-                    `cell-${screenRow}-${screenCol}`
-                );
+    drawSaveBlock();
 
-                if (cell) {
-                    cell.classList.add(currentPiece.name);
+    if (!gameOver) {
+        for (let row = 0; row < currentPiece.shape.length; row++) {
+            for (let col = 0; col < currentPiece.shape[row].length; col++) {
+                if (currentPiece.shape[row][col] === 1) {
+                    const screenRow = pieceRow + row;
+                    const screenCol = pieceCol + col;
+                    const cell = document.getElementById(
+                        `cell-${screenRow}-${screenCol}`
+                    );
+
+                    if (cell) {
+                        cell.classList.add(currentPiece.name);
+                    }
                 }
             }
         }
@@ -98,72 +162,22 @@ function draw() {
 createGrid();
 draw();
 
-setInterval(function () {
-    const gameTime = setInterval(function () {
-        if (!haveBlock(pieceRow + 1, pieceCol)) {
-            pieceRow++;
-        } else {
-            saveBlock();
-            currentPiece = getRandomPiece();
-            pieceRow = 0;
-            pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
-            if (haveBlock(pieceRow, pieceCol)) {
-                clearInterval(gameTime);
-                document.querySelector("h1").textContent = "Game Over";
-            }
-        }
-        draw();
-    }, 1000);
+let gameTime = setInterval(function () {
+    if (!haveBlock(pieceRow + 1, pieceCol)) {
+        pieceRow++;
+    } else {
+        saveBlock();
 
-    const board = [];
-    for (let row = 0; row < rows; row++) {
-        board[row] = [];
-        for (let col = 0; col < cols; col++) {
-            board[row][col] = 0;
+        currentPiece = getRandomPiece();
+        pieceRow = 0;
+        pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
+
+        if (haveBlock(pieceRow, pieceCol)) {
+            gameOver = true;
+            clearInterval(gameTime);
+            document.querySelector("h1").textContent = "Game Over";
         }
     }
 
-    function haveBlock(rowCheck, colCheck) {
-        for (let row = 0; row < currentPiece.shape.length; row++) {
-            for (let col = 0; col < currentPiece.shape[row].length; col++) {
-                if (currentPiece.shape[row][col] === 0) {
-                    continue;
-                }
-                const rowLine = rowCheck + row;
-                const colLine = colCheck + col;
-
-                if (colLine < 0 || colLIne >= cols || rowLine >= rows) {
-                    return true;
-                }
-                if (rowLine >= 0 && board[rowLine][colLine] !== 0) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    function saveBlock() {
-        for (let row = 0; row < currentPiece.shape.length; row++) {
-            for (let col = 0; col < currentPiece.shape[row].length; col++) {
-                if (currentPiece.shape[row][col] === 1) {
-                    const rowLine = pieceRow + row;
-                    const colLine = pieceCol + col;
-
-                    board[rowLine][colLine] = currentPiece.name;
-                }
-            }
-        }
-    }
-
-    function drawSaveBlock() {
-        for (let row = 0; row < rows; row++) {
-            for (let col = 0; col < cols; col++) {
-                if (board[row][col] !== 0) {
-                    const cell = document.getElementById(`cell-${row}-${col}`);
-                    cell.classList.add(board[row][col]);
-                }
-            }
-        }
-    }
-}
+    draw();
+}, 1000);
