@@ -5,6 +5,13 @@ let pieceRow = 0;
 let pieceCol = 4;
 let gameOver = false;
 
+let gameTime = null;
+
+const startButton = document.getElementById("start_button");
+const stopButton = document.getElementById("stop_button");
+const restartButton = document.getElementById("restart_button");
+const gameTitle = document.querySelector("h1");
+
 const playField = document.getElementById("playfield");
 
 const shapeI = [
@@ -51,12 +58,12 @@ const pieces = [
     { name: "L", shape: shapeL }
 ];
 
-function getRandomPiece() {
+function spamRandom() {
     const randomIndex = Math.floor(Math.random() * pieces.length);
     return pieces[randomIndex];
 }
 
-let currentPiece = getRandomPiece();
+let currentPiece = spamRandom();
 pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
 
 const board = [];
@@ -69,7 +76,7 @@ for (let row = 0; row < rows; row++) {
     }
 }
 
-function createGrid() {
+function drawGrid() {
     for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
             const cell = document.createElement("div");
@@ -130,7 +137,7 @@ function drawSaveBlock() {
     }
 }
 
-function draw() {
+function drawBackGround() {
     for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
             const cell = document.getElementById(`cell-${row}-${col}`);
@@ -159,25 +166,61 @@ function draw() {
     }
 }
 
-createGrid();
-draw();
-
-let gameTime = setInterval(function () {
+function moveDown() {
     if (!haveBlock(pieceRow + 1, pieceCol)) {
         pieceRow++;
     } else {
         saveBlock();
 
-        currentPiece = getRandomPiece();
+        currentPiece = spamRandom();
         pieceRow = 0;
         pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
 
         if (haveBlock(pieceRow, pieceCol)) {
             gameOver = true;
-            clearInterval(gameTime);
-            document.querySelector("h1").textContent = "Game Over";
+            pauseGame();
+            gameTitle.textContent = "Game Over";
         }
     }
 
-    draw();
-}, 1000);
+    drawBackGround();
+}
+
+function startGame() {
+    if (gameTime !== null || gameOver) {
+        return;
+    }
+
+    gameTime = setInterval(moveDown, 1000);
+}
+
+function pauseGame() {
+    clearInterval(gameTime);
+    gameTime = null;
+}
+
+function restartGame() {
+    pauseGame();
+
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            board[row][col] = 0;
+        }
+    }
+
+    gameOver = false;
+    currentPiece = spamRandom();
+    pieceRow = 0;
+    pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
+    gameTitle.textContent = "Welcome to Tetris";
+
+    drawBackGround();
+    startGame();
+}
+
+drawGrid();
+drawBackGround();
+
+startButton.addEventListener("click", startGame);
+stopButton.addEventListener("click", pauseGame);
+restartButton.addEventListener("click", restartGame);
