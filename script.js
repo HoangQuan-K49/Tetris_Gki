@@ -108,3 +108,35 @@ setInterval(function () {
 
     draw();
 }, 1000);
+
+const board = [];
+
+for (let row = 0; row < rows; row++) {
+    board[row] = [];
+
+    for (let col = 0; col < cols; col++) {
+        board[row][col] = 0;
+    }
+}
+
+function haveBlock(rowCheck, colCheck) {
+    for (let row = 0; row < currentPiece.shape.length; row++) {
+        for (let col = 0; col < currentPiece.shape[row].length; col++) {
+            if (currentPiece.shape[row][col] === 0) {
+                continue;
+            }
+
+            const rowLine = rowCheck + row;
+            const colLine = colCheck + col;
+
+            if (colLine < 0 || colLIne >= cols || rowLine >= rows) {
+                return true;
+            }
+
+            if (rowLine >= 0 && board[rowLine][colLine] !== 0) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
