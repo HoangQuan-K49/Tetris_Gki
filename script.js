@@ -140,3 +140,27 @@ function haveBlock(rowCheck, colCheck) {
     }
     return false;
 }
+
+function saveBlock() {
+    for (let row = 0; row < currentPiece.shape.length; row++) {
+        for (let col = 0; col < currentPiece.shape[row].length; col++) {
+            if (currentPiece.shape[row][col] === 1) {
+                const rowLine = pieceRow + row;
+                const colLine = pieceCol + col;
+
+                board[rowLine][colLine] = currentPiece.name;
+            }
+        }
+    }
+}
+
+function drawSaveBlock() {
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            if (board[row][col] !== 0) {
+                const cell = document.getElementById(`cell-${row}-${col}`);
+                cell.classList.add(board[row][col]);
+            }
+        }
+    }
+}
