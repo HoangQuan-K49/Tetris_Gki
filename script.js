@@ -223,4 +223,49 @@ drawBackGround();
 
 startButton.addEventListener("click", startGame);
 stopButton.addEventListener("click", pauseGame);
-restartButton.addEventListener("click", restartGame);
+restartButton.addEventListener("click", restartGame)
+
+function movePiece(direction) {
+    if (!haveBlock(pieceRow, pieceCol + direction)) {
+        pieceCol += direction;
+        drawBackGround();
+    }
+}
+
+function rotatePiece() {
+    const oldShape = currentPiece.shape;
+
+    currentPiece.shape = oldShape[0].map((_, col) =>
+        oldShape.map(row => row[col]).reverse()
+    );
+
+    if (haveBlock(pieceRow, pieceCol)) {
+        currentPiece.shape = oldShape;
+    }
+
+    drawBackGround();
+}
+document.addEventListener("keydown", function (event) {
+    const arrowKeys = [
+        "ArrowLeft",
+        "ArrowRight",
+        "ArrowDown",
+        "ArrowUp"
+    ];
+    if (arrowKeys.includes(event.key)) {
+        event.preventDefault();
+    }
+    if (gameTime === null || gameOver) {
+        return;
+    }
+    if (event.key === "ArrowLeft") {
+        movePiece(-1);
+    } else if (event.key === "ArrowRight") {
+        movePiece(1);
+    } else if (event.key === "ArrowDown") {
+        moveDown();
+    } else if (event.key === "ArrowUp" && !event.repeat) {
+        rotatePiece();
+    }
+});
+
