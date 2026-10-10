@@ -1,15 +1,29 @@
+:root {
+    --cell-size: 35px;
+    --gold: #f2b84b;
+    --cyan: #61dafb;
+    --panel: #252a40;
+    --background: #161922;
+    --playfield-background: #10131b;
+}
+
+* {
+    box-sizing: border-box;
+}
+
 body {
-    margin: 0;
     min-height: 100vh;
-    background-color: #161922;
+    margin: 0;
+    padding: 20px;
+    background-color: var(--background);
     color: #e8e8e8;
     font-family: Arial, sans-serif;
     text-align: center;
 }
 
 h1 {
-    margin: 30px 0;
-    color: #61dafb;
+    margin: 10px 0 30px;
+    color: var(--cyan);
     font-family: monospace;
     letter-spacing: 4px;
 }
@@ -21,32 +35,102 @@ h1 {
     gap: 24px;
 }
 
+.left_panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
 .start_ui,
+.nextBox_ui,
 .game_info {
-    width: 170px;
+    width: 208px;
     padding: 16px;
-    background-color: #252a40;
-    border: 3px solid #f2b84b;
+    border: 3px solid var(--gold);
+    background-color: var(--panel);
     text-align: left;
 }
 
+.start_ui h2,
+.nextBox_ui h2,
+.game_info h2 {
+    margin: 0 0 16px;
+    font-size: 18px;
+}
+
+.start_ui label {
+    display: block;
+    margin: 8px 0;
+}
+
+.game_info p {
+    margin: 12px 0;
+}
 
 #playfield {
     display: grid;
-    grid-template-columns: repeat(10, 35px);
-    grid-template-rows: repeat(20, 35px);
-    box-sizing: content-box;
-    width: 350px;
-    height: 700px;
-    border: 3px solid #f2b84b;
-    background-color: #10131b;
+    grid-template-columns: repeat(10, var(--cell-size));
+    grid-template-rows: repeat(20, var(--cell-size));
+    width: calc(10 * var(--cell-size) + 6px);
+    height: calc(20 * var(--cell-size) + 6px);
+    border: 3px solid var(--gold);
+    background-color: var(--playfield-background);
+}
+
+.cell {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    border: 1px solid #282d39;
+    background-color: var(--playfield-background);
+}
+
+.cell.I {
+    background-color: #22d3ee;
+}
+
+.cell.O {
+    background-color: #facc15;
+}
+
+.cell.T {
+    background-color: #a855f7;
+}
+
+.cell.S {
+    background-color: #22c55e;
+}
+
+.cell.Z {
+    background-color: #ef4444;
+}
+
+.cell.J {
+    background-color: #3b82f6;
+}
+
+.cell.L {
+    background-color: #f97316;
+}
+
+#next_piece {
+    display: grid;
+    width: 100%;
+    min-height: 120px;
+    justify-content: center;
+    align-content: center;
+    gap: 2px;
+    background-color: var(--playfield-background);
+}
+
+#next_piece .cell {
+    width: 24px;
+    height: 24px;
 }
 
 .game_button {
-    box-sizing: border-box;
     width: 100%;
+    margin-top: 10px;
     padding: 10px;
-    margin-top: 12px;
     border: 0;
     border-radius: 6px;
     font-weight: bold;
@@ -54,7 +138,7 @@ h1 {
 }
 
 #start_button {
-    background-color: #61dafb;
+    background-color: var(--cyan);
 }
 
 #stop_button {
@@ -65,39 +149,24 @@ h1 {
 #restart_button {
     background-color: gold;
 }
-.left_panel {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-.nextBox_ui {
-    width: 170px;
-    padding: 16px;
-    border: 3px solid #f2b84b;
-    text-align: left;
+
+@media (max-width: 850px) {
+    .game {
+        flex-wrap: wrap;
+    }
 }
 
-.nextBox_ui h3 {
-    margin-top: 0;
-}
-#next_piece {
-    width: 180px;
-    height: 180px;
-    background-color: #10131b;
-}
+@media (max-width: 420px) {
+    :root {
+        --cell-size: 30px;
+    }
 
-.cell {
-    width: 35px;
-    height: 35px;
-    box-sizing: border-box;
-    border: 1px solid #282d39;
-    background-color: #10131b;
-}
+    body {
+        padding: 12px;
+    }
 
-.cell.I { background-color: #22d3ee; }
-.cell.O { background-color: #facc15; }
-.cell.T { background-color: #a855f7; }
-.cell.S { background-color: #22c55e; }
-.cell.Z { background-color: #ef4444; }
-.cell.J { background-color: #3b82f6; }
-.cell.L { background-color: #f97316; }
+    h1 {
+        font-size: 24px;
+        letter-spacing: 2px;
+    }
+}

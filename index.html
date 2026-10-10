@@ -12,36 +12,37 @@
 <h1>Welcome to Tetris</h1>
 
 <main class="game">
-    <div class="left_panel">
-    <div class="start_ui">
-        <h3>Chọn cấp độ chơi:</h3>
-        <label><input type="radio" name="level" value="1" checked> Lv1</label>
-        <label><input type="radio" name="level" value="2"> Lv2</label>
-        <label><input type="radio" name="level" value="3"> Lv3</label>
-        <label><input type="radio" name="level" value="4"> Lv4</label>
-        <label><input type="radio" name="level" value="5"> Lv5</label>
-        <label><input type="radio" name="level" value="6"> Lv6</label>
-    </div>
-<br>
-    <div class="nextBox_ui">
-        <h3>Khối kế tiếp</h3>
-        <div id="next_piece"></div>
-    </div>
-    </div>
-    <div id="playfield">
+    <section class="left_panel">
+        <div class="start_ui">
+            <h2>Chọn cấp độ chơi</h2>
 
-    </div>
+            <label><input type="radio" name="level" value="1" checked> Lv1</label>
+            <label><input type="radio" name="level" value="2"> Lv2</label>
+            <label><input type="radio" name="level" value="3"> Lv3</label>
+            <label><input type="radio" name="level" value="4"> Lv4</label>
+            <label><input type="radio" name="level" value="5"> Lv5</label>
+            <label><input type="radio" name="level" value="6"> Lv6</label>
+        </div>
+
+        <div class="nextBox_ui">
+            <h2>Khối kế tiếp</h2>
+            <div id="next_piece"></div>
+        </div>
+    </section>
+
+    <div id="playfield"></div>
 
     <aside class="game_info">
+        <h2>Thông tin</h2>
+
         <p>Điểm: <span id="score">0</span></p>
-        <p>Hàng đã xoá: <span id="lines">0</span></p>
+        <p>Hàng đã xóa: <span id="lines">0</span></p>
         <p>Cấp độ: <span id="level">1</span></p>
+
         <button class="game_button" id="start_button">Bắt đầu</button>
         <button class="game_button" id="stop_button">Tạm dừng</button>
         <button class="game_button" id="restart_button">Chơi lại</button>
     </aside>
-
-
 </main>
 </body>
 </html>

@@ -2,17 +2,20 @@ const rows = 20;
 const cols = 10;
 
 let pieceRow = 0;
-let pieceCol = 4;
+let pieceCol = 0;
 let gameOver = false;
-
 let gameTime = null;
+let score = 0;
+let totalLines = 0;
 
 const startButton = document.getElementById("start_button");
 const stopButton = document.getElementById("stop_button");
 const restartButton = document.getElementById("restart_button");
 const gameTitle = document.querySelector("h1");
-
+const scoreText = document.getElementById("score");
+const linesText = document.getElementById("lines");
 const playField = document.getElementById("playfield");
+const nextPieceBox = document.getElementById("next_piece");
 
 const shapeI = [
     [1, 1, 1, 1]
@@ -60,21 +63,23 @@ const pieces = [
 
 function spamRandom() {
     const randomIndex = Math.floor(Math.random() * pieces.length);
-    return pieces[randomIndex];
+    const piece = pieces[randomIndex];
+
+    return {
+        name: piece.name,
+        shape: piece.shape.map(row => row.slice())
+    };
 }
 
 let currentPiece = spamRandom();
+let nextPiece = spamRandom();
+
 pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
 
-const board = [];
-
-for (let row = 0; row < rows; row++) {
-    board[row] = [];
-
-    for (let col = 0; col < cols; col++) {
-        board[row][col] = 0;
-    }
-}
+const board = Array.from(
+    { length: rows },
+    () => Array(cols).fill(0)
+);
 
 function drawGrid() {
     for (let row = 0; row < rows; row++) {
@@ -120,18 +125,23 @@ function saveBlock() {
                 const rowLine = pieceRow + row;
                 const colLine = pieceCol + col;
 
-                board[rowLine][colLine] = currentPiece.name;
+                if (rowLine >= 0) {
+                    board[rowLine][colLine] = currentPiece.name;
+                }
             }
         }
     }
 }
 
-function drawSaveBlock() {
+function drawSavedBlocks() {
     for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
             if (board[row][col] !== 0) {
                 const cell = document.getElementById(`cell-${row}-${col}`);
-                cell.classList.add(board[row][col]);
+
+                if (cell) {
+                    cell.classList.add(board[row][col]);
+                }
             }
         }
     }
@@ -145,7 +155,7 @@ function drawBackGround() {
         }
     }
 
-    drawSaveBlock();
+    drawSavedBlocks();
 
     if (!gameOver) {
         for (let row = 0; row < currentPiece.shape.length; row++) {
@@ -166,15 +176,68 @@ function drawBackGround() {
     }
 }
 
+function clearLines() {
+    let clearedLines = 0;
+
+    for (let row = rows - 1; row >= 0; row--) {
+        if (board[row].every(cell => cell !== 0)) {
+            board.splice(row, 1);
+            board.unshift(Array(cols).fill(0));
+            clearedLines++;
+            row++;
+        }
+    }
+
+    return clearedLines;
+}
+
+function updateScore(clearedLines) {
+    const points = [0, 100, 300, 500, 800];
+
+    score += points[clearedLines] || 0;
+    totalLines += clearedLines;
+
+    scoreText.textContent = score;
+    linesText.textContent = totalLines;
+}
+
+function drawNextPiece() {
+    nextPieceBox.innerHTML = "";
+    nextPieceBox.style.display = "grid";
+    nextPieceBox.style.gridTemplateColumns =
+        `repeat(${nextPiece.shape[0].length}, 24px)`;
+    nextPieceBox.style.gap = "2px";
+
+    for (let row = 0; row < nextPiece.shape.length; row++) {
+        for (let col = 0; col < nextPiece.shape[row].length; col++) {
+            const cell = document.createElement("div");
+            cell.classList.add("cell");
+
+            if (nextPiece.shape[row][col] === 1) {
+                cell.classList.add(nextPiece.name);
+            }
+
+            nextPieceBox.appendChild(cell);
+        }
+    }
+}
+
 function moveDown() {
     if (!haveBlock(pieceRow + 1, pieceCol)) {
         pieceRow++;
     } else {
         saveBlock();
 
-        currentPiece = spamRandom();
+        const clearedLines = clearLines();
+        updateScore(clearedLines);
+
+        currentPiece = nextPiece;
+        nextPiece = spamRandom();
+
         pieceRow = 0;
         pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
+
+        drawNextPiece();
 
         if (haveBlock(pieceRow, pieceCol)) {
             gameOver = true;
@@ -203,27 +266,27 @@ function restartGame() {
     pauseGame();
 
     for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
-            board[row][col] = 0;
-        }
+        board[row].fill(0);
     }
 
     gameOver = false;
+    score = 0;
+    totalLines = 0;
+    scoreText.textContent = score;
+    linesText.textContent = totalLines;
+
     currentPiece = spamRandom();
+    nextPiece = spamRandom();
+
     pieceRow = 0;
     pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
+
     gameTitle.textContent = "Welcome to Tetris";
 
+    drawNextPiece();
     drawBackGround();
     startGame();
 }
-
-drawGrid();
-drawBackGround();
-
-startButton.addEventListener("click", startGame);
-stopButton.addEventListener("click", pauseGame);
-restartButton.addEventListener("click", restartGame)
 
 function movePiece(direction) {
     if (!haveBlock(pieceRow, pieceCol + direction)) {
@@ -245,6 +308,15 @@ function rotatePiece() {
 
     drawBackGround();
 }
+
+drawGrid();
+drawNextPiece();
+drawBackGround();
+
+startButton.addEventListener("click", startGame);
+stopButton.addEventListener("click", pauseGame);
+restartButton.addEventListener("click", restartGame);
+
 document.addEventListener("keydown", function (event) {
     const arrowKeys = [
         "ArrowLeft",
@@ -252,12 +324,15 @@ document.addEventListener("keydown", function (event) {
         "ArrowDown",
         "ArrowUp"
     ];
+
     if (arrowKeys.includes(event.key)) {
         event.preventDefault();
     }
+
     if (gameTime === null || gameOver) {
         return;
     }
+
     if (event.key === "ArrowLeft") {
         movePiece(-1);
     } else if (event.key === "ArrowRight") {
@@ -268,4 +343,3 @@ document.addEventListener("keydown", function (event) {
         rotatePiece();
     }
 });
-
