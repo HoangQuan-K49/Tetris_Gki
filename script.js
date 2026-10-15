@@ -5,6 +5,7 @@ let pieceRow = 0;
 let pieceCol = 0;
 let gameOver = false;
 let gameTime = null;
+let gameStarted = false;
 let score = 0;
 let totalLines = 0;
 
@@ -16,6 +17,16 @@ const scoreText = document.getElementById("score");
 const linesText = document.getElementById("lines");
 const playField = document.getElementById("playfield");
 const nextPieceBox = document.getElementById("next_piece");
+const levelText = document.getElementById("level");
+const levelInputs = document.querySelectorAll('input[name="level"]');
+
+function getSelectedLevel() {
+    return Number(
+        document.querySelector('input[name="level"]:checked').value
+    );
+}
+
+let gameLevel = getSelectedLevel();
 
 const shapeI = [
     [1, 1, 1, 1]
@@ -51,7 +62,21 @@ const shapeL = [
     [1, 1, 1]
 ];
 
-const pieces = [
+// Khối I dạng chữ hoa trong ảnh
+const shapeI2 = [
+    [1, 1, 1],
+    [0, 1, 0],
+    [0, 1, 0],
+    [0, 1, 0],
+    [1, 1, 1]
+];
+
+const shapeU = [
+    [1, 0, 1],
+    [1, 1, 1]
+];
+
+const basicPieces = [
     { name: "I", shape: shapeI },
     { name: "O", shape: shapeO },
     { name: "T", shape: shapeT },
@@ -61,9 +86,27 @@ const pieces = [
     { name: "L", shape: shapeL }
 ];
 
-function spamRandom() {
-    const randomIndex = Math.floor(Math.random() * pieces.length);
-    const piece = pieces[randomIndex];
+const lv2Pieces = [
+    { name: "I", shape: shapeI },
+    { name: "O", shape: shapeO },
+    { name: "T", shape: shapeT },
+    { name: "S", shape: shapeS },
+    { name: "Z", shape: shapeZ },
+    { name: "J", shape: shapeJ },
+    { name: "L", shape: shapeL },
+    { name: "I2", shape: shapeI2 },
+    { name: "U", shape: shapeU }
+];
+
+function getRandomPiece() {
+    let availablePieces = basicPieces;
+
+    if (gameLevel === 2) {
+        availablePieces = lv2Pieces;
+    }
+
+    const randomIndex = Math.floor(Math.random() * availablePieces.length);
+    const piece = availablePieces[randomIndex];
 
     return {
         name: piece.name,
@@ -71,8 +114,8 @@ function spamRandom() {
     };
 }
 
-let currentPiece = spamRandom();
-let nextPiece = spamRandom();
+let currentPiece = getRandomPiece();
+let nextPiece = getRandomPiece();
 
 pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
 
@@ -89,6 +132,67 @@ function drawGrid() {
             cell.id = `cell-${row}-${col}`;
             cell.classList.add("cell");
             playField.appendChild(cell);
+        }
+    }
+}
+
+function drawSavedBlocks() {
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            if (board[row][col] !== 0) {
+                const cell = document.getElementById(`cell-${row}-${col}`);
+                cell.classList.add(board[row][col]);
+            }
+        }
+    }
+}
+
+function drawBackGround() {
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            const cell = document.getElementById(`cell-${row}-${col}`);
+            cell.className = "cell";
+        }
+    }
+
+    drawSavedBlocks();
+
+    if (!gameOver) {
+        for (let row = 0; row < currentPiece.shape.length; row++) {
+            for (let col = 0; col < currentPiece.shape[row].length; col++) {
+                if (currentPiece.shape[row][col] === 1) {
+                    const screenRow = pieceRow + row;
+                    const screenCol = pieceCol + col;
+                    const cell = document.getElementById(
+                        `cell-${screenRow}-${screenCol}`
+                    );
+
+                    if (cell) {
+                        cell.classList.add(currentPiece.name);
+                    }
+                }
+            }
+        }
+    }
+}
+
+function drawNextPiece() {
+    nextPieceBox.innerHTML = "";
+    nextPieceBox.style.display = "grid";
+    nextPieceBox.style.gridTemplateColumns =
+        `repeat(${nextPiece.shape[0].length}, 24px)`;
+    nextPieceBox.style.gap = "2px";
+
+    for (let row = 0; row < nextPiece.shape.length; row++) {
+        for (let col = 0; col < nextPiece.shape[row].length; col++) {
+            const cell = document.createElement("div");
+            cell.classList.add("cell");
+
+            if (nextPiece.shape[row][col] === 1) {
+                cell.classList.add(nextPiece.name);
+            }
+
+            nextPieceBox.appendChild(cell);
         }
     }
 }
@@ -133,49 +237,6 @@ function saveBlock() {
     }
 }
 
-function drawSavedBlocks() {
-    for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
-            if (board[row][col] !== 0) {
-                const cell = document.getElementById(`cell-${row}-${col}`);
-
-                if (cell) {
-                    cell.classList.add(board[row][col]);
-                }
-            }
-        }
-    }
-}
-
-function drawBackGround() {
-    for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
-            const cell = document.getElementById(`cell-${row}-${col}`);
-            cell.className = "cell";
-        }
-    }
-
-    drawSavedBlocks();
-
-    if (!gameOver) {
-        for (let row = 0; row < currentPiece.shape.length; row++) {
-            for (let col = 0; col < currentPiece.shape[row].length; col++) {
-                if (currentPiece.shape[row][col] === 1) {
-                    const screenRow = pieceRow + row;
-                    const screenCol = pieceCol + col;
-                    const cell = document.getElementById(
-                        `cell-${screenRow}-${screenCol}`
-                    );
-
-                    if (cell) {
-                        cell.classList.add(currentPiece.name);
-                    }
-                }
-            }
-        }
-    }
-}
-
 function clearLines() {
     let clearedLines = 0;
 
@@ -201,25 +262,18 @@ function updateScore(clearedLines) {
     linesText.textContent = totalLines;
 }
 
-function drawNextPiece() {
-    nextPieceBox.innerHTML = "";
-    nextPieceBox.style.display = "grid";
-    nextPieceBox.style.gridTemplateColumns =
-        `repeat(${nextPiece.shape[0].length}, 24px)`;
-    nextPieceBox.style.gap = "2px";
+function selectLevel(selectedLevel) {
+    gameLevel = Number(selectedLevel);
+    levelText.textContent = gameLevel;
 
-    for (let row = 0; row < nextPiece.shape.length; row++) {
-        for (let col = 0; col < nextPiece.shape[row].length; col++) {
-            const cell = document.createElement("div");
-            cell.classList.add("cell");
+    currentPiece = getRandomPiece();
+    nextPiece = getRandomPiece();
 
-            if (nextPiece.shape[row][col] === 1) {
-                cell.classList.add(nextPiece.name);
-            }
+    pieceRow = 0;
+    pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
 
-            nextPieceBox.appendChild(cell);
-        }
-    }
+    drawNextPiece();
+    drawBackGround();
 }
 
 function moveDown() {
@@ -232,7 +286,7 @@ function moveDown() {
         updateScore(clearedLines);
 
         currentPiece = nextPiece;
-        nextPiece = spamRandom();
+        nextPiece = getRandomPiece();
 
         pieceRow = 0;
         pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
@@ -245,7 +299,6 @@ function moveDown() {
             gameTitle.textContent = "Game Over";
         }
     }
-
     drawBackGround();
 }
 
@@ -254,6 +307,7 @@ function startGame() {
         return;
     }
 
+    gameStarted = true;
     gameTime = setInterval(moveDown, 1000);
 }
 
@@ -270,21 +324,14 @@ function restartGame() {
     }
 
     gameOver = false;
+    gameStarted = false;
     score = 0;
     totalLines = 0;
     scoreText.textContent = score;
     linesText.textContent = totalLines;
-
-    currentPiece = spamRandom();
-    nextPiece = spamRandom();
-
-    pieceRow = 0;
-    pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
-
     gameTitle.textContent = "Welcome to Tetris";
 
-    drawNextPiece();
-    drawBackGround();
+    selectLevel(getSelectedLevel());
     startGame();
 }
 
@@ -310,13 +357,21 @@ function rotatePiece() {
 }
 
 drawGrid();
+levelText.textContent = gameLevel;
 drawNextPiece();
 drawBackGround();
+
+levelInputs.forEach(input => {
+    input.addEventListener("change", function () {
+        if (!gameStarted && gameTime === null) {
+            selectLevel(this.value);
+        }
+    });
+});
 
 startButton.addEventListener("click", startGame);
 stopButton.addEventListener("click", pauseGame);
 restartButton.addEventListener("click", restartGame);
-
 document.addEventListener("keydown", function (event) {
     const arrowKeys = [
         "ArrowLeft",
@@ -328,11 +383,9 @@ document.addEventListener("keydown", function (event) {
     if (arrowKeys.includes(event.key)) {
         event.preventDefault();
     }
-
     if (gameTime === null || gameOver) {
         return;
     }
-
     if (event.key === "ArrowLeft") {
         movePiece(-1);
     } else if (event.key === "ArrowRight") {

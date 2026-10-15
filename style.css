@@ -1,12 +1,3 @@
-:root {
-    --cell-size: 35px;
-    --gold: #f2b84b;
-    --cyan: #61dafb;
-    --panel: #252a40;
-    --background: #161922;
-    --playfield-background: #10131b;
-}
-
 * {
     box-sizing: border-box;
 }
@@ -15,15 +6,15 @@ body {
     min-height: 100vh;
     margin: 0;
     padding: 20px;
-    background-color: var(--background);
-    color: #e8e8e8;
+    background-color: midnightblue;
+    color: whitesmoke;
     font-family: Arial, sans-serif;
     text-align: center;
 }
 
 h1 {
     margin: 10px 0 30px;
-    color: var(--cyan);
+    color: deepskyblue;
     font-family: monospace;
     letter-spacing: 4px;
 }
@@ -46,8 +37,8 @@ h1 {
 .game_info {
     width: 208px;
     padding: 16px;
-    border: 3px solid var(--gold);
-    background-color: var(--panel);
+    border: 3px solid gold;
+    background-color: darkslategray;
     text-align: left;
 }
 
@@ -69,47 +60,57 @@ h1 {
 
 #playfield {
     display: grid;
-    grid-template-columns: repeat(10, var(--cell-size));
-    grid-template-rows: repeat(20, var(--cell-size));
-    width: calc(10 * var(--cell-size) + 6px);
-    height: calc(20 * var(--cell-size) + 6px);
-    border: 3px solid var(--gold);
-    background-color: var(--playfield-background);
+    grid-template-columns:
+        35px 35px 35px 35px 35px
+        35px 35px 35px 35px 35px;
+    grid-auto-rows: 35px;
+    width: 356px;
+    height: 706px;
+    border: 3px solid gold;
+    background-color: black;
 }
 
 .cell {
-    width: var(--cell-size);
-    height: var(--cell-size);
-    border: 1px solid #282d39;
-    background-color: var(--playfield-background);
+    width: 35px;
+    height: 35px;
+    border: 1px solid dimgray;
+    background-color: black;
 }
 
 .cell.I {
-    background-color: #22d3ee;
+    background-color: cyan;
 }
 
 .cell.O {
-    background-color: #facc15;
+    background-color: yellow;
 }
 
 .cell.T {
-    background-color: #a855f7;
+    background-color: blueviolet;
 }
 
 .cell.S {
-    background-color: #22c55e;
+    background-color: limegreen;
 }
 
 .cell.Z {
-    background-color: #ef4444;
+    background-color: red;
 }
 
 .cell.J {
-    background-color: #3b82f6;
+    background-color: royalblue;
 }
 
 .cell.L {
-    background-color: #f97316;
+    background-color: darkorange;
+}
+
+.cell.I2 {
+    background-color: deeppink;
+}
+
+.cell.U {
+    background-color: lightseagreen;
 }
 
 #next_piece {
@@ -119,7 +120,7 @@ h1 {
     justify-content: center;
     align-content: center;
     gap: 2px;
-    background-color: var(--playfield-background);
+    background-color: black;
 }
 
 #next_piece .cell {
@@ -138,7 +139,7 @@ h1 {
 }
 
 #start_button {
-    background-color: var(--cyan);
+    background-color: deepskyblue;
 }
 
 #stop_button {
@@ -148,25 +149,4 @@ h1 {
 
 #restart_button {
     background-color: gold;
-}
-
-@media (max-width: 850px) {
-    .game {
-        flex-wrap: wrap;
-    }
-}
-
-@media (max-width: 420px) {
-    :root {
-        --cell-size: 30px;
-    }
-
-    body {
-        padding: 12px;
-    }
-
-    h1 {
-        font-size: 24px;
-        letter-spacing: 2px;
-    }
 }
