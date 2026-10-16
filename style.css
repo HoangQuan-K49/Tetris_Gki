@@ -3,20 +3,17 @@
 }
 
 body {
-    min-height: 100vh;
     margin: 0;
-    padding: 20px;
-    background-color: midnightblue;
+    background-color: cornflowerblue;
     color: whitesmoke;
     font-family: Arial, sans-serif;
     text-align: center;
 }
 
 h1 {
-    margin: 10px 0 30px;
-    color: deepskyblue;
+    margin: 10px 0 16px;
+    font-size: 40px;
     font-family: monospace;
-    letter-spacing: 4px;
 }
 
 .game {
@@ -42,11 +39,10 @@ h1 {
     text-align: left;
 }
 
-.start_ui h2,
-.nextBox_ui h2,
-.game_info h2 {
+h2 {
     margin: 0 0 16px;
-    font-size: 18px;
+    font-size: 17px;
+    white-space: nowrap;
 }
 
 .start_ui label {
@@ -54,72 +50,34 @@ h1 {
     margin: 8px 0;
 }
 
-.game_info p {
-    margin: 12px 0;
-}
-
 #playfield {
     display: grid;
-    grid-template-columns:
-        35px 35px 35px 35px 35px
-        35px 35px 35px 35px 35px;
+    grid-template-columns: repeat(10, 35px);
     grid-auto-rows: 35px;
-    width: 356px;
-    height: 706px;
     border: 3px solid gold;
     background-color: black;
 }
 
 .cell {
-    width: 35px;
-    height: 35px;
-    border: 1px solid dimgray;
-    background-color: black;
+    border: 1px solid darkgray;
 }
 
-.cell.I {
-    background-color: cyan;
-}
-
-.cell.O {
-    background-color: yellow;
-}
-
-.cell.T {
-    background-color: blueviolet;
-}
-
-.cell.S {
-    background-color: limegreen;
-}
-
-.cell.Z {
-    background-color: red;
-}
-
-.cell.J {
-    background-color: royalblue;
-}
-
-.cell.L {
-    background-color: darkorange;
-}
-
-.cell.I2 {
-    background-color: deeppink;
-}
-
-.cell.U {
-    background-color: lightseagreen;
-}
+.cell.I  { background-color: cyan; }
+.cell.O  { background-color: yellow; }
+.cell.T  { background-color: blueviolet; }
+.cell.S  { background-color: limegreen; }
+.cell.Z  { background-color: red; }
+.cell.J  { background-color: royalblue; }
+.cell.L  { background-color: darkorange; }
+.cell.I2 { background-color: deeppink; }
+.cell.U  { background-color: lightseagreen; }
+.cell.empty { border-color: transparent; }
 
 #next_piece {
     display: grid;
-    width: 100%;
     min-height: 120px;
     justify-content: center;
     align-content: center;
-    gap: 2px;
     background-color: black;
 }
 
@@ -132,21 +90,11 @@ h1 {
     width: 100%;
     margin-top: 10px;
     padding: 10px;
-    border: 0;
     border-radius: 6px;
-    font-weight: bold;
     cursor: pointer;
 }
 
-#start_button {
-    background-color: deepskyblue;
-}
+#start_button   { background-color: deepskyblue; }
+#stop_button    { background-color: crimson; color: white; }
+#restart_button { background-color: gold; }
 
-#stop_button {
-    background-color: crimson;
-    color: white;
-}
-
-#restart_button {
-    background-color: gold;
-}

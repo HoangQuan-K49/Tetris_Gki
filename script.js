@@ -1,11 +1,12 @@
 const rows = 20;
 const cols = 10;
 
+const fallSpeed = [1000, 800, 600, 450, 300, 200];
+
 let pieceRow = 0;
 let pieceCol = 0;
 let gameOver = false;
 let gameTime = null;
-let gameStarted = false;
 let score = 0;
 let totalLines = 0;
 
@@ -62,10 +63,8 @@ const shapeL = [
     [1, 1, 1]
 ];
 
-// Khối I dạng chữ hoa trong ảnh
-const shapeI2 = [
+const shapeIUpper = [
     [1, 1, 1],
-    [0, 1, 0],
     [0, 1, 0],
     [0, 1, 0],
     [1, 1, 1]
@@ -94,14 +93,14 @@ const lv2Pieces = [
     { name: "Z", shape: shapeZ },
     { name: "J", shape: shapeJ },
     { name: "L", shape: shapeL },
-    { name: "I2", shape: shapeI2 },
+    { name: "I2", shape: shapeIUpper },
     { name: "U", shape: shapeU }
 ];
 
 function getRandomPiece() {
     let availablePieces = basicPieces;
 
-    if (gameLevel === 2) {
+    if (gameLevel >= 2) {
         availablePieces = lv2Pieces;
     }
 
@@ -114,10 +113,8 @@ function getRandomPiece() {
     };
 }
 
-let currentPiece = getRandomPiece();
-let nextPiece = getRandomPiece();
-
-pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
+let currentPiece = null;
+let nextPiece = null;
 
 const board = Array.from(
     { length: rows },
@@ -190,6 +187,8 @@ function drawNextPiece() {
 
             if (nextPiece.shape[row][col] === 1) {
                 cell.classList.add(nextPiece.name);
+            } else {
+                cell.classList.add("empty");
             }
 
             nextPieceBox.appendChild(cell);
@@ -241,7 +240,15 @@ function clearLines() {
     let clearedLines = 0;
 
     for (let row = rows - 1; row >= 0; row--) {
-        if (board[row].every(cell => cell !== 0)) {
+        let isFull = true;
+
+        for (let col = 0; col < cols; col++) {
+            if (board[row][col] === 0) {
+                isFull = false;
+            }
+        }
+
+        if (isFull) {
             board.splice(row, 1);
             board.unshift(Array(cols).fill(0));
             clearedLines++;
@@ -262,17 +269,27 @@ function updateScore(clearedLines) {
     linesText.textContent = totalLines;
 }
 
-function selectLevel(selectedLevel) {
-    gameLevel = Number(selectedLevel);
-    levelText.textContent = gameLevel;
-
-    currentPiece = getRandomPiece();
+function spawnPiece(piece) {
+    currentPiece = piece;
     nextPiece = getRandomPiece();
 
     pieceRow = 0;
     pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
 
     drawNextPiece();
+}
+
+function setLevelLocked(locked) {
+    levelInputs.forEach(input => {
+        input.disabled = locked;
+    });
+}
+
+function selectLevel(selectedLevel) {
+    gameLevel = Number(selectedLevel);
+    levelText.textContent = gameLevel;
+
+    spawnPiece(getRandomPiece());
     drawBackGround();
 }
 
@@ -285,13 +302,7 @@ function moveDown() {
         const clearedLines = clearLines();
         updateScore(clearedLines);
 
-        currentPiece = nextPiece;
-        nextPiece = getRandomPiece();
-
-        pieceRow = 0;
-        pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
-
-        drawNextPiece();
+        spawnPiece(nextPiece);
 
         if (haveBlock(pieceRow, pieceCol)) {
             gameOver = true;
@@ -307,8 +318,8 @@ function startGame() {
         return;
     }
 
-    gameStarted = true;
-    gameTime = setInterval(moveDown, 1000);
+    setLevelLocked(true);
+    gameTime = setInterval(moveDown, fallSpeed[gameLevel - 1]);
 }
 
 function pauseGame() {
@@ -324,15 +335,14 @@ function restartGame() {
     }
 
     gameOver = false;
-    gameStarted = false;
     score = 0;
     totalLines = 0;
     scoreText.textContent = score;
     linesText.textContent = totalLines;
     gameTitle.textContent = "Welcome to Tetris";
 
+    setLevelLocked(false);
     selectLevel(getSelectedLevel());
-    startGame();
 }
 
 function movePiece(direction) {
@@ -344,10 +354,19 @@ function movePiece(direction) {
 
 function rotatePiece() {
     const oldShape = currentPiece.shape;
+    const newShape = [];
 
-    currentPiece.shape = oldShape[0].map((_, col) =>
-        oldShape.map(row => row[col]).reverse()
-    );
+    for (let col = 0; col < oldShape[0].length; col++) {
+        const newRow = [];
+
+        for (let row = oldShape.length - 1; row >= 0; row--) {
+            newRow.push(oldShape[row][col]);
+        }
+
+        newShape.push(newRow);
+    }
+
+    currentPiece.shape = newShape;
 
     if (haveBlock(pieceRow, pieceCol)) {
         currentPiece.shape = oldShape;
@@ -358,14 +377,12 @@ function rotatePiece() {
 
 drawGrid();
 levelText.textContent = gameLevel;
-drawNextPiece();
+spawnPiece(getRandomPiece());
 drawBackGround();
 
 levelInputs.forEach(input => {
     input.addEventListener("change", function () {
-        if (!gameStarted && gameTime === null) {
-            selectLevel(this.value);
-        }
+        selectLevel(this.value);
     });
 });
 
