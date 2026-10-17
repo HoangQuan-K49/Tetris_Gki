@@ -9,6 +9,7 @@ let gameOver = false;
 let gameTime = null;
 let score = 0;
 let totalLines = 0;
+let nextGarbageLine = 5;
 
 const startButton = document.getElementById("start_button");
 const stopButton = document.getElementById("stop_button");
@@ -76,25 +77,25 @@ const shapeU = [
 ];
 
 const basicPieces = [
-    { name: "I", shape: shapeI },
-    { name: "O", shape: shapeO },
-    { name: "T", shape: shapeT },
-    { name: "S", shape: shapeS },
-    { name: "Z", shape: shapeZ },
-    { name: "J", shape: shapeJ },
-    { name: "L", shape: shapeL }
+    {name: "I", shape: shapeI},
+    {name: "O", shape: shapeO},
+    {name: "T", shape: shapeT},
+    {name: "S", shape: shapeS},
+    {name: "Z", shape: shapeZ},
+    {name: "J", shape: shapeJ},
+    {name: "L", shape: shapeL}
 ];
 
 const lv2Pieces = [
-    { name: "I", shape: shapeI },
-    { name: "O", shape: shapeO },
-    { name: "T", shape: shapeT },
-    { name: "S", shape: shapeS },
-    { name: "Z", shape: shapeZ },
-    { name: "J", shape: shapeJ },
-    { name: "L", shape: shapeL },
-    { name: "I2", shape: shapeIUpper },
-    { name: "U", shape: shapeU }
+    {name: "I", shape: shapeI},
+    {name: "O", shape: shapeO},
+    {name: "T", shape: shapeT},
+    {name: "S", shape: shapeS},
+    {name: "Z", shape: shapeZ},
+    {name: "J", shape: shapeJ},
+    {name: "L", shape: shapeL},
+    {name: "I2", shape: shapeIUpper},
+    {name: "U", shape: shapeU}
 ];
 
 function getRandomPiece() {
@@ -117,7 +118,7 @@ let currentPiece = null;
 let nextPiece = null;
 
 const board = Array.from(
-    { length: rows },
+    {length: rows},
     () => Array(cols).fill(0)
 );
 
@@ -259,6 +260,31 @@ function clearLines() {
     return clearedLines;
 }
 
+function addGarbageRow() {
+    if (board[0].some(cell => cell !== 0)) {
+        gameOver = true;
+        pauseGame();
+        gameTitle.textContent = "Game Over";
+        return;
+    }
+
+    const garbageRow = Array(cols).fill("garbage");
+
+    const hole1 = Math.floor(Math.random() * cols);
+    let hole2 = Math.floor(Math.random() * cols);
+
+    while (hole2 === hole1) {
+        hole2 = Math.floor(Math.random() * cols);
+    }
+
+    garbageRow[hole1] = 0;
+    garbageRow[hole2] = 0;
+
+    board.shift();
+    board.push(garbageRow);
+}
+
+
 function updateScore(clearedLines) {
     const points = [0, 100, 300, 500, 800];
 
@@ -302,6 +328,15 @@ function moveDown() {
         const clearedLines = clearLines();
         updateScore(clearedLines);
 
+        if (gameLevel === 3 && totalLines >= nextGarbageLine) {
+            addGarbageRow();
+            nextGarbageLine += 5;
+            if (gameOver) {
+                drawBackGround();
+                return;
+            }
+        }
+
         spawnPiece(nextPiece);
 
         if (haveBlock(pieceRow, pieceCol)) {
@@ -329,18 +364,16 @@ function pauseGame() {
 
 function restartGame() {
     pauseGame();
-
+    nextGarbageLine = 5;
     for (let row = 0; row < rows; row++) {
         board[row].fill(0);
     }
-
     gameOver = false;
     score = 0;
     totalLines = 0;
     scoreText.textContent = score;
     linesText.textContent = totalLines;
     gameTitle.textContent = "Welcome to Tetris";
-
     setLevelLocked(false);
     selectLevel(getSelectedLevel());
 }
@@ -355,10 +388,8 @@ function movePiece(direction) {
 function rotatePiece() {
     const oldShape = currentPiece.shape;
     const newShape = [];
-
     for (let col = 0; col < oldShape[0].length; col++) {
         const newRow = [];
-
         for (let row = oldShape.length - 1; row >= 0; row--) {
             newRow.push(oldShape[row][col]);
         }
@@ -371,7 +402,6 @@ function rotatePiece() {
     if (haveBlock(pieceRow, pieceCol)) {
         currentPiece.shape = oldShape;
     }
-
     drawBackGround();
 }
 

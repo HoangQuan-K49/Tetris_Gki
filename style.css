@@ -72,6 +72,10 @@ h2 {
 .cell.I2 { background-color: deeppink; }
 .cell.U  { background-color: lightseagreen; }
 .cell.empty { border-color: transparent; }
+.cell.garbage {
+    background-color: #555;
+    border-color: #333;
+}
 
 #next_piece {
     display: grid;
