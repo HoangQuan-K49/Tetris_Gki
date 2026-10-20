@@ -9,12 +9,12 @@ let gameOver = false;
 let gameTime = null;
 let score = 0;
 let totalLines = 0;
-let nextGarbageLine = 5;
+let GarbageLine = 5;
 
 const startButton = document.getElementById("start_button");
 const stopButton = document.getElementById("stop_button");
 const restartButton = document.getElementById("restart_button");
-const gameTitle = document.querySelector("h1");
+const title = document.querySelector("h1");
 const scoreText = document.getElementById("score");
 const linesText = document.getElementById("lines");
 const playField = document.getElementById("playfield");
@@ -28,7 +28,7 @@ function getSelectedLevel() {
     );
 }
 
-let gameLevel = getSelectedLevel();
+let level = getSelectedLevel();
 
 const shapeI = [
     [1, 1, 1, 1]
@@ -101,7 +101,7 @@ const lv2Pieces = [
 function getRandomPiece() {
     let availablePieces = basicPieces;
 
-    if (gameLevel >= 2) {
+    if (level >= 2) {
         availablePieces = lv2Pieces;
     }
 
@@ -126,7 +126,6 @@ function drawGrid() {
     for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
             const cell = document.createElement("div");
-
             cell.id = `cell-${row}-${col}`;
             cell.classList.add("cell");
             playField.appendChild(cell);
@@ -264,7 +263,7 @@ function addGarbageRow() {
     if (board[0].some(cell => cell !== 0)) {
         gameOver = true;
         pauseGame();
-        gameTitle.textContent = "Game Over";
+        title.textContent = "Game Over";
         return;
     }
 
@@ -312,8 +311,8 @@ function setLevelLocked(locked) {
 }
 
 function selectLevel(selectedLevel) {
-    gameLevel = Number(selectedLevel);
-    levelText.textContent = gameLevel;
+    level = Number(selectedLevel);
+    levelText.textContent = level;
 
     spawnPiece(getRandomPiece());
     drawBackGround();
@@ -328,9 +327,9 @@ function moveDown() {
         const clearedLines = clearLines();
         updateScore(clearedLines);
 
-        if (gameLevel === 3 && totalLines >= nextGarbageLine) {
+        if (level === 3 && totalLines >= GarbageLine) {
             addGarbageRow();
-            nextGarbageLine += 5;
+            GarbageLine += 5;
             if (gameOver) {
                 drawBackGround();
                 return;
@@ -342,7 +341,7 @@ function moveDown() {
         if (haveBlock(pieceRow, pieceCol)) {
             gameOver = true;
             pauseGame();
-            gameTitle.textContent = "Game Over";
+            title.textContent = "Game Over";
         }
     }
     drawBackGround();
@@ -354,7 +353,7 @@ function startGame() {
     }
 
     setLevelLocked(true);
-    gameTime = setInterval(moveDown, fallSpeed[gameLevel - 1]);
+    gameTime = setInterval(moveDown, fallSpeed[level - 1]);
 }
 
 function pauseGame() {
@@ -364,7 +363,7 @@ function pauseGame() {
 
 function restartGame() {
     pauseGame();
-    nextGarbageLine = 5;
+    GarbageLine = 5;
     for (let row = 0; row < rows; row++) {
         board[row].fill(0);
     }
@@ -373,7 +372,7 @@ function restartGame() {
     totalLines = 0;
     scoreText.textContent = score;
     linesText.textContent = totalLines;
-    gameTitle.textContent = "Welcome to Tetris";
+    title.textContent = "Welcome to Tetris";
     setLevelLocked(false);
     selectLevel(getSelectedLevel());
 }
@@ -406,7 +405,7 @@ function rotatePiece() {
 }
 
 drawGrid();
-levelText.textContent = gameLevel;
+levelText.textContent = level;
 spawnPiece(getRandomPiece());
 drawBackGround();
 
