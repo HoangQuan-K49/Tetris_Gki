@@ -99,7 +99,7 @@ const lv2Pieces = [
 
 function getRandomPiece() {
     let availablePieces = basicPieces;
-    if (level >= 2) {
+    if (level === 2) {
         availablePieces = lv2Pieces;
     }
     const randomIndex = Math.floor(Math.random() * availablePieces.length);
@@ -302,6 +302,8 @@ function selectLevel(selectedLevel) {
     level = Number(selectedLevel);
     levelText.textContent = level;
     pieceCount = 0;
+    garbageLine = 5;
+    rotationLocked = false;
     spawnPiece(getRandomPiece());
     drawBackGround();
 }
@@ -313,7 +315,7 @@ function moveDown() {
         saveBlock();
         const clearedLines = clearLines();
         updateScore(clearedLines);
-        if (level >= 3 && totalLines >= garbageLine) {
+        if (level === 3 && totalLines >= garbageLine) {
             addGarbageRow();
             garbageLine += 5;
             if (gameOver) {
@@ -321,7 +323,6 @@ function moveDown() {
                 return;
             }
         }
-
         spawnPiece(nextPiece);
         if (haveBlock(pieceRow, pieceCol)) {
             gameOver = true;
