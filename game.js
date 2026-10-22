@@ -141,6 +141,28 @@ function drawGrid() {
     }
 }
 
+function addObstacles() {
+    let count = 0;
+    while (count < 6) {
+        let row = Math.floor(Math.random() * 5) + 14;
+        let col = Math.floor(Math.random() * cols);
+        if (board[row][col] === 0) {
+            board[row][col] = "obstacle";
+            count++;
+        }
+    }
+}
+
+function clearObstacles() {
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            if (board[row][col] === "obstacle") {
+                board[row][col] = 0;
+            }
+        }
+    }
+}
+
 function drawSavedBlocks() {
     for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
@@ -241,20 +263,22 @@ function clearLines() {
     let clearedLines = 0;
     for (let row = rows - 1; row >= 0; row--) {
         let isFull = true;
-
+        let hasObstacle = false;
         for (let col = 0; col < cols; col++) {
             if (board[row][col] === 0) {
                 isFull = false;
             }
+            if (board[row][col] === "obstacle") {
+                hasObstacle = true;
+            }
         }
-        if (isFull) {
+        if (isFull && !hasObstacle) {
             board.splice(row, 1);
             board.unshift(Array(cols).fill(0));
             clearedLines++;
             row++;
         }
     }
-
     return clearedLines;
 }
 
@@ -311,11 +335,15 @@ function setLevelLocked(locked) {
 }
 
 function selectLevel(selectedLevel) {
+    clearObstacles();
     level = Number(selectedLevel);
     levelText.textContent = level;
     pieceCount = 0;
     garbageLine = 5;
     rotationLocked = false;
+    if (level === 6) {
+        addObstacles();
+    }
     spawnPiece(getRandomPiece());
     drawBackGround();
 }

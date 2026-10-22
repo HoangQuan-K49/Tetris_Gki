@@ -4,12 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tetris</title>
-
     <style>
         * {
             box-sizing: border-box;
         }
-
         body {
             margin: 0;
             background-color: cornflowerblue;
@@ -17,26 +15,22 @@
             font-family: Arial, sans-serif;
             text-align: center;
         }
-
         h1 {
             margin: 10px 0 16px;
             font-size: 40px;
             font-family: monospace;
         }
-
         .game {
             display: flex;
             justify-content: center;
             align-items: flex-start;
             gap: 24px;
         }
-
         .left_panel {
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
-
         .start_ui,
         .nextBox_ui,
         .game_info {
@@ -46,18 +40,15 @@
             background-color: darkslategray;
             text-align: left;
         }
-
         h2 {
             margin: 0 0 16px;
             font-size: 17px;
             white-space: nowrap;
         }
-
         .start_ui label {
             display: block;
             margin: 8px 0;
         }
-
         #playfield {
             display: grid;
             grid-template-columns: repeat(10, 35px);
@@ -65,7 +56,6 @@
             border: 3px solid gold;
             background-color: black;
         }
-
         .cell {
             border: 1px solid darkgray;
         }
@@ -80,7 +70,6 @@
         .cell.U  { background-color: lightseagreen; }
         .cell.empty {border-color: transparent;}
         .cell.garbage {background-color: #555;border-color: #333;}
-
         .cell.BOMB {
             position: relative;
             background: radial-gradient(circle at 50% 35%, #fff9c4 0%, #ff9800 25%, #ff1744 65%, #8e0000 100%);
@@ -92,8 +81,10 @@
                     inset 0 0 8px #fff9c4;
             z-index: 1;
         }
-
-
+        .cell.obstacle {
+            background-color: #777;
+            border: 1px solid #999;
+        }
         #next_piece {
             display: grid;
             min-height: 120px;
@@ -101,19 +92,16 @@
             align-content: center;
             background-color: black;
         }
-
         #next_piece .cell {
             width: 24px;
             height: 24px;
         }
-
         .game_button {
             width: 100%;
             margin-top: 10px;
             padding: 10px;
             cursor: pointer;
         }
-
         #start_button {
             background-color: deepskyblue;
         }
@@ -127,12 +115,10 @@
             background-color: gold;
         }
     </style>
-
     <script src="game.js" defer></script>
 </head>
 <body>
 <h1>Welcome to Tetris</h1>
-
 <main class="game">
     <section class="left_panel">
         <div class="start_ui">
@@ -144,15 +130,12 @@
             <label><input type="radio" name="level" value="5"> Lv5</label>
             <label><input type="radio" name="level" value="6"> Lv6</label>
         </div>
-
         <div class="nextBox_ui">
             <h2>Khối kế tiếp</h2>
             <div id="next_piece"></div>
         </div>
     </section>
-
     <div id="playfield"></div>
-
     <aside class="game_info">
         <h2>Thông tin</h2>
         <p>Điểm: <span id="score">0</span></p>
