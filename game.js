@@ -74,6 +74,12 @@ const shapeU = [
     [1, 0, 1],
     [1, 1, 1]
 ];
+const shapeBomb = [
+    [0, 1, 1, 0],
+    [1, 1, 1, 1],
+    [0, 1, 1, 0],
+    [0, 1, 1, 0]
+];
 
 const basicPieces = [
     {name: "I", shape: shapeI},
@@ -97,10 +103,17 @@ const lv2Pieces = [
     {name: "U", shape: shapeU}
 ];
 
+const lv5Pieces = [
+    ...basicPieces,
+    {name: "BOMB", shape: shapeBomb}
+];
+
 function getRandomPiece() {
     let availablePieces = basicPieces;
     if (level === 2) {
         availablePieces = lv2Pieces;
+    } else if (level === 5) {
+        availablePieces = lv5Pieces;
     }
     const randomIndex = Math.floor(Math.random() * availablePieces.length);
     const piece = availablePieces[randomIndex];
@@ -282,8 +295,7 @@ function spawnPiece(piece) {
     pieceRow = 0;
     pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
     pieceCount++;
-    rotationLocked = level >= 4 && pieceCount % 5 === 0;
-
+    rotationLocked = level === 4 && pieceCount % 5 === 0;
     if (rotationLocked) {
         title.textContent = "Khối này không thể xoay";
     } else {
@@ -307,20 +319,38 @@ function selectLevel(selectedLevel) {
     spawnPiece(getRandomPiece());
     drawBackGround();
 }
+function explodeBomb() {
+    for (let row = pieceRow + 2; row < pieceRow + 5; row++) {
+        for (let col = pieceCol - 1; col < pieceCol + 4; col++) {
+            if (row >= 0 && row < rows && col >= 0 && col < cols) {
+                if (board[row][col] !== 0) {
+                    board[row][col] = 0;
+                    score += 10;
+                }
+            }
+        }
+    }
+    scoreText.textContent = score;
+}
 
 function moveDown() {
     if (!haveBlock(pieceRow + 1, pieceCol)) {
         pieceRow++;
     } else {
-        saveBlock();
-        const clearedLines = clearLines();
-        updateScore(clearedLines);
-        if (level === 3 && totalLines >= garbageLine) {
-            addGarbageRow();
-            garbageLine += 5;
-            if (gameOver) {
-                drawBackGround();
-                return;
+        if (currentPiece.name === "BOMB" && level === 5) {
+            explodeBomb();
+        } else {
+            saveBlock();
+            const clearedLines = clearLines();
+            updateScore(clearedLines);
+
+            if (level === 3 && totalLines >= garbageLine) {
+                addGarbageRow();
+                garbageLine += 5;
+                if (gameOver) {
+                    drawBackGround();
+                    return;
+                }
             }
         }
         spawnPiece(nextPiece);
@@ -332,7 +362,6 @@ function moveDown() {
     }
     drawBackGround();
 }
-
 function startGame() {
     if (gameTime !== null || gameOver) {
         return;
