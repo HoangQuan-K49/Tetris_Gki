@@ -1,75 +1,81 @@
 const rows = 20;
 const cols = 10;
 const fallSpeed = [1000, 800, 600, 500, 300, 200];
+const lvUp = 10;
+const garbageStep = 3;
+const startButton = document.getElementById("start_button");
+const stopButton = document.getElementById("stop_button");
+const restartButton = document.getElementById("restart_button");
+const title = document.querySelector("h1");
+const scoreText = document.getElementById("score");
+const totalScoreText = document.getElementById("total_score");
+const lineText = document.getElementById("line");
+const playField = document.getElementById("playfield");
+const nextPieceBox = document.getElementById("next_piece");
+const levelText = document.getElementById("level");
+const levelInput = document.querySelectorAll('input[name="level"]');
+const board = [];
+
+for (let row = 0; row < rows; row++) {
+    const newRow = [];
+    for (let col = 0; col < cols; col++) {
+        newRow.push(0);
+    }
+    board.push(newRow);
+}
 
 let pieceRow = 0;
 let pieceCol = 0;
 let gameOver = false;
 let gameTime = null;
 let score = 0;
-let totalLines = 0;
-let garbageLine = 5;
+let totalScore = 0;
+let levelLine = 0;
+let garbageLine = garbageStep;
 let pieceCount = 0;
-let rotationLocked = false;
+let rotationLock = false;
+let currentPiece = null;
+let nextPiece = null;
 
-const startButton = document.getElementById("start_button");
-const stopButton = document.getElementById("stop_button");
-const restartButton = document.getElementById("restart_button");
-const title = document.querySelector("h1");
-const scoreText = document.getElementById("score");
-const linesText = document.getElementById("lines");
-const playField = document.getElementById("playfield");
-const nextPieceBox = document.getElementById("next_piece");
-const levelText = document.getElementById("level");
-const levelInputs = document.querySelectorAll('input[name="level"]');
-
-function getSelectedLevel() {
+function getSelectLevel() {
     return Number(document.querySelector('input[name="level"]:checked').value);
 }
 
-let level = getSelectedLevel();
+let level = getSelectLevel();
 
 const shapeI = [
     [1, 1, 1, 1]
 ];
-
 const shapeO = [
     [1, 1],
     [1, 1]
 ];
-
 const shapeT = [
     [0, 1, 0],
     [1, 1, 1]
 ];
-
 const shapeS = [
     [0, 1, 1],
     [1, 1, 0]
 ];
-
 const shapeZ = [
     [1, 1, 0],
     [0, 1, 1]
 ];
-
 const shapeJ = [
     [1, 0, 0],
     [1, 1, 1]
 ];
-
 const shapeL = [
     [0, 0, 1],
     [1, 1, 1]
 ];
-
 const shapeIUpper = [
     [1, 1, 1],
     [0, 1, 0],
     [0, 1, 0],
     [1, 1, 1]
 ];
-
 const shapeU = [
     [1, 0, 1],
     [1, 1, 1]
@@ -81,7 +87,7 @@ const shapeBomb = [
     [0, 1, 1, 0]
 ];
 
-const basicPieces = [
+const basicPiece = [
     {name: "I", shape: shapeI},
     {name: "O", shape: shapeO},
     {name: "T", shape: shapeT},
@@ -90,8 +96,7 @@ const basicPieces = [
     {name: "J", shape: shapeJ},
     {name: "L", shape: shapeL}
 ];
-
-const lv2Pieces = [
+const level2Piece = [
     {name: "I", shape: shapeI},
     {name: "O", shape: shapeO},
     {name: "T", shape: shapeT},
@@ -102,34 +107,39 @@ const lv2Pieces = [
     {name: "I2", shape: shapeIUpper},
     {name: "U", shape: shapeU}
 ];
+const level5Piece = [];
+for (let i = 0; i < basicPiece.length; i++) {
+    level5Piece.push(basicPiece[i]);
+}
+level5Piece.push({name: "Bomb", shape: shapeBomb});
 
-const lv5Pieces = [
-    ...basicPieces,
-    {name: "BOMB", shape: shapeBomb}
-];
-
+// lay khoi ngau nhien de tha xuong
 function getRandomPiece() {
-    let availablePieces = basicPieces;
+    let pieceList = basicPiece;
     if (level === 2) {
-        availablePieces = lv2Pieces;
+        pieceList = level2Piece;
     } else if (level === 5) {
-        availablePieces = lv5Pieces;
+        pieceList = level5Piece;
     }
-    const randomIndex = Math.floor(Math.random() * availablePieces.length);
-    const piece = availablePieces[randomIndex];
-    return {
+    const randomNumber = Math.random();
+    const randomIndex = Math.floor(randomNumber * pieceList.length);
+    const piece = pieceList[randomIndex];
+    const shapeCopy = [];
+    for (let row = 0; row < piece.shape.length; row++) {
+        const newRow = [];
+        for (let col = 0; col < piece.shape[row].length; col++) {
+            newRow.push(piece.shape[row][col]);
+        }
+        shapeCopy.push(newRow);
+    }
+    const newPiece = {
         name: piece.name,
-        shape: piece.shape.map(row => row.slice())
+        shape: shapeCopy
     };
+    return newPiece;
 }
 
-let currentPiece = null;
-let nextPiece = null;
-const board = Array.from(
-    {length: rows},
-    () => Array(cols).fill(0)
-);
-
+// ve luoi
 function drawGrid() {
     for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
@@ -141,19 +151,39 @@ function drawGrid() {
     }
 }
 
-function addObstacles() {
-    let count = 0;
-    while (count < 6) {
-        let row = Math.floor(Math.random() * 5) + 14;
-        let col = Math.floor(Math.random() * cols);
-        if (board[row][col] === 0) {
-            board[row][col] = "obstacle";
-            count++;
+// dat toi da 6 vat can ngau nhien vao cac o trong o hang 14-18 khi bat dau lv6
+function addObstacle() {
+    const emptyCells = [];
+    for (let row = 14; row <= 18; row++) {
+        for (let col = 0; col < cols; col++) {
+            if (board[row][col] === 0) {
+                const position = [row, col];
+                emptyCells.push(position);
+            }
         }
+    }
+    let obstacleCount = 6;
+    if (emptyCells.length < 6) {
+        obstacleCount = emptyCells.length;
+    }
+    for (let i = 0; i < obstacleCount; i++) {
+        const randomNumber = Math.random();
+        const randomIndex = Math.floor(randomNumber * emptyCells.length);
+        const position = emptyCells[randomIndex];
+        const row = position[0];
+        const col = position[1];
+        board[row][col] = "obstacle";
+
+        // Xoa vi tri da chon khoi danh sach de khong chon trung
+        for (let j = randomIndex; j < emptyCells.length - 1; j++) {
+            emptyCells[j] = emptyCells[j + 1];
+        }
+        emptyCells.length = emptyCells.length - 1;
     }
 }
 
-function clearObstacles() {
+// xoa vat can
+function clearObstacle() {
     for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
             if (board[row][col] === "obstacle") {
@@ -163,7 +193,8 @@ function clearObstacles() {
     }
 }
 
-function drawSavedBlocks() {
+// ve cac khoi khi da roi xuong cham day va khong nhuc nhich
+function drawSaveBlock() {
     for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
             if (board[row][col] !== 0) {
@@ -174,25 +205,22 @@ function drawSavedBlocks() {
     }
 }
 
-function drawBackGround() {
+// ve lai man game voi cac o
+function drawBackground() {
     for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
             const cell = document.getElementById(`cell-${row}-${col}`);
             cell.className = "cell";
         }
     }
-
-    drawSavedBlocks();
-
-    if (!gameOver) {
+    drawSaveBlock();
+    if (!gameOver && currentPiece !== null) {
         for (let row = 0; row < currentPiece.shape.length; row++) {
             for (let col = 0; col < currentPiece.shape[row].length; col++) {
                 if (currentPiece.shape[row][col] === 1) {
                     const screenRow = pieceRow + row;
                     const screenCol = pieceCol + col;
-                    const cell = document.getElementById(
-                        `cell-${screenRow}-${screenCol}`
-                    );
+                    const cell = document.getElementById(`cell-${screenRow}-${screenCol}`);
                     if (cell) {
                         cell.classList.add(currentPiece.name);
                     }
@@ -202,17 +230,21 @@ function drawBackGround() {
     }
 }
 
+// ve khoi tiep theo cho Ui khoi tiep theo
 function drawNextPiece() {
     nextPieceBox.innerHTML = "";
+    const pieceWidth = nextPiece.shape[0].length;
+    let columnStyle = "";
+    for (let i = 0; i < pieceWidth; i++) {
+        columnStyle += "24px ";
+    }
     nextPieceBox.style.display = "grid";
-    nextPieceBox.style.gridTemplateColumns =
-        `repeat(${nextPiece.shape[0].length}, 24px)`;
+    nextPieceBox.style.gridTemplateColumns = columnStyle;
     nextPieceBox.style.gap = "2px";
     for (let row = 0; row < nextPiece.shape.length; row++) {
         for (let col = 0; col < nextPiece.shape[row].length; col++) {
             const cell = document.createElement("div");
             cell.classList.add("cell");
-
             if (nextPiece.shape[row][col] === 1) {
                 cell.classList.add(nextPiece.name);
             } else {
@@ -223,28 +255,22 @@ function drawNextPiece() {
     }
 }
 
+// kiem tra va cham voi khoi khac ,voi tuong va voi day
 function haveBlock(rowCheck, colCheck) {
     for (let row = 0; row < currentPiece.shape.length; row++) {
         for (let col = 0; col < currentPiece.shape[row].length; col++) {
             if (currentPiece.shape[row][col] === 1) {
                 const rowLine = rowCheck + row;
                 const colLine = colCheck + col;
-                if (
-                    colLine < 0 ||
-                    colLine >= cols ||
-                    rowLine >= rows
-                ) {
-                    return true;
-                }
-                if (rowLine >= 0 && board[rowLine][colLine] !== 0) {
-                    return true;
-                }
+                if (colLine < 0 || colLine >= cols || rowLine >= rows) return true;
+                if (rowLine >= 0 && board[rowLine][colLine] !== 0) return true;
             }
         }
     }
     return false;
 }
 
+// luu khoi hien tai vao board khi da cham day hoac cham khoi khac
 function saveBlock() {
     for (let row = 0; row < currentPiece.shape.length; row++) {
         for (let col = 0; col < currentPiece.shape[row].length; col++) {
@@ -259,8 +285,9 @@ function saveBlock() {
     }
 }
 
-function clearLines() {
-    let clearedLines = 0;
+// xoa hang khi duoc lap day
+function clearLine() {
+    let lineCount = 0;
     for (let row = rows - 1; row >= 0; row--) {
         let isFull = true;
         let hasObstacle = false;
@@ -273,15 +300,27 @@ function clearLines() {
             }
         }
         if (isFull && !hasObstacle) {
-            board.splice(row, 1);
-            board.unshift(Array(cols).fill(0));
-            clearedLines++;
+
+            // Dich cac hang phia tren xuong mot hang
+            for (let moveRow = row; moveRow > 0; moveRow--) {
+                board[moveRow] = board[moveRow - 1];
+            }
+
+            // Tao hang trong moi o tren cung
+            const newRow = [];
+            for (let col = 0; col < cols; col++) {
+                newRow.push(0);
+            }
+            board[0] = newRow;
+
+            lineCount++;
             row++;
         }
     }
-    return clearedLines;
+    return lineCount;
 }
 
+// them 1 hang rac (co 2 lo ngau nhien) o day, day cac hang len; thua neu hang tren cung co khoi
 function addGarbageRow() {
     for (let col = 0; col < cols; col++) {
         if (board[0][col] !== 0) {
@@ -291,197 +330,269 @@ function addGarbageRow() {
             return;
         }
     }
-
-    const garbageRow = Array(cols).fill("garbage");
-    const hole1 = Math.floor(Math.random() * cols);
-    let hole2 = Math.floor(Math.random() * cols);
-    while (hole2 === hole1) {
-        hole2 = Math.floor(Math.random() * cols);
+    const garbageRow = [];
+    for (let col = 0; col < cols; col++) {
+        garbageRow.push("garbage");
     }
-
+    const randomNumber1 = Math.random();
+    const hole1 = Math.floor(randomNumber1 * cols);
+    let randomNumber2 = Math.random();
+    let hole2 = Math.floor(randomNumber2 * cols);
+    while (hole2 === hole1) {
+        randomNumber2 = Math.random();
+        hole2 = Math.floor(randomNumber2 * cols);
+    }
     garbageRow[hole1] = 0;
     garbageRow[hole2] = 0;
-    board.shift();
-    board.push(garbageRow);
+
+    // Dich cac hang len tren mot hang
+    for (let row = 0; row < rows - 1; row++) {
+        board[row] = board[row + 1];
+    }
+
+    // Dua hang rac xuong vi tri cuoi cung
+    board[rows - 1] = garbageRow;
 }
 
-function updateScore(clearedLines) {
-    const points = [0, 100, 300, 500, 800];
-    score += points[clearedLines] || 0;
-    totalLines += clearedLines;
+// cap nhat diem va so hang cua lv sau moi lan xoa hang
+function updateScore(lineCount) {
+    const point = [0, 100, 300, 500, 700];
+    let gainPoint = 0;
+    if (lineCount >= 0 && lineCount < point.length) {
+        gainPoint = point[lineCount];
+    }
+    score += gainPoint;
+    totalScore += gainPoint;
+    levelLine += lineCount;
     scoreText.textContent = score;
-    linesText.textContent = totalLines;
+    totalScoreText.textContent = totalScore;
+    lineText.textContent = levelLine + "/" + lvUp;
 }
 
+// dat khoi hien tai len dau man hinh, sinh khoi ke tiep, thua neu khong con cho de dat
 function spawnPiece(piece) {
     currentPiece = piece;
     nextPiece = getRandomPiece();
     pieceRow = 0;
     pieceCol = Math.floor((cols - currentPiece.shape[0].length) / 2);
     pieceCount++;
-    rotationLocked = level === 4 && pieceCount % 5 === 0;
-    if (rotationLocked) {
+    rotationLock = level === 4 && pieceCount % 5 === 0;
+    if (rotationLock) {
         title.textContent = "Khối này không thể xoay";
     } else {
         title.textContent = "Welcome to Tetris";
     }
     drawNextPiece();
+    if (haveBlock(pieceRow, pieceCol)) {
+        gameOver = true;
+        pauseGame();
+        title.textContent = "Game Over";
+    }
 }
 
-function setLevelLocked(locked) {
-    levelInputs.forEach(input => {
-        input.disabled = locked;
-    });
+// khoa lv khi dang choi
+function setLevelLock(lock) {
+    for (let i = 0; i < levelInput.length; i++) {
+        levelInput[i].disabled = lock;
+    }
 }
 
-function selectLevel(selectedLevel) {
-    clearObstacles();
-    level = Number(selectedLevel);
+// chuyen sang lv moi: reset diem lv, dat lai bien cua lv, tao khoi moi
+function selectLevel(newLevel) {
+    clearObstacle();
+    level = Number(newLevel);
+    score = 0;
+    scoreText.textContent = score;
+    totalScoreText.textContent = totalScore;
     levelText.textContent = level;
     pieceCount = 0;
-    garbageLine = 5;
-    rotationLocked = false;
-    if (level === 6) {
-        addObstacles();
-    }
+    levelLine = 0;
+    lineText.textContent = levelLine + "/" + lvUp;
+    garbageLine = garbageStep;
+    rotationLock = false;
+    if (level === 6) addObstacle();
     spawnPiece(getRandomPiece());
-    drawBackGround();
+    drawBackground();
 }
+
+// co che no bomb 4x4 cua lv5 tinh tu than bomb tro xuong
 function explodeBomb() {
-    for (let row = pieceRow + 2; row < pieceRow + 5; row++) {
-        for (let col = pieceCol - 1; col < pieceCol + 4; col++) {
+    for (let row = pieceRow + 2; row < pieceRow + 6; row++) {
+        for (let col = pieceCol; col < pieceCol + 4; col++) {
             if (row >= 0 && row < rows && col >= 0 && col < cols) {
                 if (board[row][col] !== 0) {
                     board[row][col] = 0;
                     score += 10;
+                    totalScore += 10;
                 }
             }
         }
     }
     scoreText.textContent = score;
+    totalScoreText.textContent = totalScore;
 }
 
+// qua lv moi khi du so hang cua lv (lvUp); o lv6 thi thang game
+function passLevel() {
+    pauseGame();
+    if (level === 6) {
+        gameOver = true;
+        title.textContent = "Bạn đã phá đảo! Tổng điểm: " + totalScore;
+        drawBackground();
+        return;
+    }
+    levelInput[level].checked = true;
+    selectLevel(level + 1);
+    if (gameOver) return;
+    title.textContent = "Lên Lv" + level + "!";
+    gameTime = setInterval(moveDown, fallSpeed[level - 1]);
+}
+
+// khoi roi 1 o; neu cham thi luu khoi/no bomb, xoa hang, tinh diem, qua lv, sinh khoi moi
 function moveDown() {
     if (!haveBlock(pieceRow + 1, pieceCol)) {
         pieceRow++;
     } else {
-        if (currentPiece.name === "BOMB" && level === 5) {
+        if (currentPiece.name === "Bomb" && level === 5) {
             explodeBomb();
+            const lineCount = clearLine();
+            updateScore(lineCount);
+            if (levelLine >= lvUp) {
+                passLevel();
+                return;
+            }
         } else {
             saveBlock();
-            const clearedLines = clearLines();
-            updateScore(clearedLines);
-
-            if (level === 3 && totalLines >= garbageLine) {
-                addGarbageRow();
-                garbageLine += 5;
-                if (gameOver) {
-                    drawBackGround();
-                    return;
+            const lineCount = clearLine();
+            updateScore(lineCount);
+            if (level === 3) {
+                while (levelLine >= garbageLine) {
+                    addGarbageRow();
+                    garbageLine += garbageStep;
+                    if (gameOver) {
+                        drawBackground();
+                        return;
+                    }
                 }
+            }
+            if (levelLine >= lvUp) {
+                passLevel();
+                return;
             }
         }
         spawnPiece(nextPiece);
-        if (haveBlock(pieceRow, pieceCol)) {
-            gameOver = true;
-            pauseGame();
-            title.textContent = "Game Over";
-        }
     }
-    drawBackGround();
+    drawBackground();
 }
+
+// nut bat dau
 function startGame() {
-    if (gameTime !== null || gameOver) {
-        return;
-    }
-    setLevelLocked(true);
+    if (gameTime !== null || gameOver) return;
+    setLevelLock(true);
     gameTime = setInterval(moveDown, fallSpeed[level - 1]);
 }
 
+// nut tam dung
 function pauseGame() {
     clearInterval(gameTime);
     gameTime = null;
 }
 
+// nut choi lai: xoa board, reset diem lv va so hang, giu tong diem
 function restartGame() {
     pauseGame();
-    garbageLine = 5;
     for (let row = 0; row < rows; row++) {
-        board[row].fill(0);
+        for (let col = 0; col < cols; col++) {
+            board[row][col] = 0;
+        }
     }
     gameOver = false;
     score = 0;
-    totalLines = 0;
     scoreText.textContent = score;
-    linesText.textContent = totalLines;
+    totalScoreText.textContent = totalScore;
     title.textContent = "Welcome to Tetris";
-    setLevelLocked(false);
-    selectLevel(getSelectedLevel());
+    setLevelLock(false);
+    selectLevel(getSelectLevel());
 }
 
+// di chuyen khoi qua lai
 function movePiece(direction) {
     if (!haveBlock(pieceRow, pieceCol + direction)) {
         pieceCol += direction;
-        drawBackGround();
+        drawBackground();
     }
 }
 
+// xoay khoi 90 do theo chieu kim dong ho
 function rotatePiece() {
-    if (rotationLocked) {
-        return;
-    }
+    if (rotationLock) return;
     const oldShape = currentPiece.shape;
     const oldHeight = oldShape.length;
     const oldWidth = oldShape[0].length;
     const newShape = [];
     for (let i = 0; i < oldWidth; i++) {
-        newShape.push(Array(oldHeight).fill(0));
+        const newRow = [];
+        for (let j = 0; j < oldHeight; j++) {
+            newRow.push(0);
+        }
+        newShape.push(newRow);
     }
-    for (let r = 0; r < oldHeight; r++) {
-        for (let c = 0; c < oldWidth; c++) {
-            newShape[c][oldHeight - 1 - r] = oldShape[r][c];
+    for (let row = 0; row < oldHeight; row++) {
+        for (let col = 0; col < oldWidth; col++) {
+            const newRow = col;
+            const newCol = oldHeight - 1 - row;
+            newShape[newRow][newCol] = oldShape[row][col];
         }
     }
-
     currentPiece.shape = newShape;
     if (haveBlock(pieceRow, pieceCol)) {
         currentPiece.shape = oldShape;
     }
-    drawBackGround();
+    drawBackground();
 }
 
 drawGrid();
-selectLevel(getSelectedLevel());
-levelInputs.forEach(input => {
-    input.addEventListener("change", function () {
+selectLevel(getSelectLevel());
+for (let i = 0; i < levelInput.length; i++) {
+    levelInput[i].addEventListener("change", function () {
         selectLevel(this.value);
     });
-});
+}
 
+// gan cac nut vao su kien choi game
 startButton.addEventListener("click", startGame);
 stopButton.addEventListener("click", pauseGame);
 restartButton.addEventListener("click", restartGame);
 document.addEventListener("keydown", function (event) {
-    const arrowKeys = [
+    const arrowKey = [
         "ArrowLeft",
         "ArrowRight",
         "ArrowDown",
         "ArrowUp"
     ];
-
-    if (arrowKeys.includes(event.key)) {
+    let isArrowKey = false;
+    for (let i = 0; i < arrowKey.length; i++) {
+        if (event.key === arrowKey[i]) {
+            isArrowKey = true;
+            break;
+        }
+    }
+    if (isArrowKey) {
         event.preventDefault();
     }
-    if (gameTime === null || gameOver) {
-        return;
-    }
-    if (event.key === "ArrowLeft") {
-        movePiece(-1);
-    } else if (event.key === "ArrowRight") {
-        movePiece(1);
-    } else if (event.key === "ArrowDown") {
-        moveDown();
-    } else if (event.key === "ArrowUp" && !event.repeat) {
-        rotatePiece();
+    if (gameTime === null || gameOver) return;
+    switch (event.key) {
+        case "ArrowLeft":
+            movePiece(-1);
+            break;
+        case "ArrowRight":
+            movePiece(1);
+            break;
+        case "ArrowDown":
+            moveDown();
+            break;
+        case "ArrowUp":
+            if (!event.repeat) rotatePiece();
+            break;
     }
 });
